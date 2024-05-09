@@ -4,11 +4,26 @@
 {{/* ports are exposed, the first one is used, unless set with VIRTUAL_PORT */}}
 
 server {
-	listen 80 default_server;
-	server_name _; # This is just an invalid value which will never trigger on a real hostname.
-	error_log /proc/self/fd/2;
-	access_log /proc/self/fd/1;
-	return 503;
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl default_server;
+    http2  on;
+
+    server_name localhost;
+
+    ssl_certificate /etc/nginx/certs/localhost.pem;
+    ssl_certificate_key /etc/nginx/certs/localhost-key.pem;
+
+    root /usr/share/nginx/html/;
+
+    if ($host != $server_name) {
+        return 404;
+    }
 }
 
 {{ range $host, $containers := groupByMulti $ "Env.VIRTUAL_HOST" "," }}
@@ -56,10 +71,16 @@ upstream {{ $host }} {
 server {
 	gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
 
+    listen 443 ssl;
+    http2  on;
+
 	server_name {{ $host }};
 	proxy_buffering off;
 	error_log /proc/self/fd/2;
 	access_log /proc/self/fd/1;
+
+	ssl_certificate /etc/nginx/certs/{{$host}}.pem;
+    ssl_certificate_key /etc/nginx/certs/{{$host}}-key.pem;
 
 	location / {
 		proxy_pass http://{{ trim $host }};
@@ -67,10 +88,14 @@ server {
 		proxy_set_header X-Real-IP $remote_addr;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header X-Forwarded-Ssl on;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
 
 		# HTTP 1.1 support
 		proxy_http_version 1.1;
-		proxy_set_header Connection "";
+		#proxy_set_header Connection "";
 	}
 }
 {{ end }}

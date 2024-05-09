@@ -1,8 +1,8 @@
 [[config]]
 template = "/etc/docker-gen/templates/domain-list.txt.tpl"
-dest = "/tmp/dockergen/domain-list.txt"
+dest = "/tmp/domain-list.txt"
 watch = true
-notifycmd = "generate-certificates /tmp/dockergen/domain-list.txt"
+notifycmd = "generate-certificates /tmp/domain-list.txt"
 
 [[config]]
 template = "/etc/docker-gen/templates/index.html.tpl"
@@ -11,6 +11,8 @@ watch = true
 
 [[config]]
 template = "/etc/docker-gen/templates/nginx.conf.tpl"
-dest = "etc/nginx/conf.d/default.conf"
+dest = "/etc/nginx/conf.d/default.conf"
 watch = true
-notifycmd = "/etc/init.d/nginx reload"
+
+[config.NotifyContainers]
+nginx = 1  # 1 is a signal number to be sent; here SIGHUP
