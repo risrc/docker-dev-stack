@@ -1,0 +1,80 @@
+#!/bin/bash
+
+workingDir="$(readlink -f "$(dirname "$0")")"
+projectDir="$(dirname "$workingDir")"
+mkcertPath=$workingDir/mkcert
+showWslHint=0
+
+mkdir -p data/certs data/html data/proxy
+
+export CAROOT=$projectDir/data/certs
+
+echo "os: $OSTYPE"
+# detect os and check dependencies
+case "$OSTYPE" in
+  'linux'*)
+    echo 'detected Linux operating system'
+    mkcertOS='linux'
+    dependencyCheckFailed=0
+    if ! command -v jq &> /dev/null; then
+      echo "Missing dependency - Please install jq (See https://jqlang.github.io/jq/download/ for further information)"
+      dependencyCheckFailed=1
+    fi
+    if ! command -v certutil &> /dev/null; then
+      echo "Missing dependency - Please install certutil provided by nss-tools (See https://github.com/FiloSottile/mkcert/blob/master/README.md#linux)"
+      dependencyCheckFailed=1
+    fi
+    if [ $dependencyCheckFailed = 1 ]; then exit 1; fi
+    # check for wsl
+    if uname -r | grep -q 'microsoft'; then
+      showWslHint=1
+    fi
+    ;;
+  'darwin'*)
+    echo 'detected MacOS - checking dependencies'
+    mkcertOS='darwin'
+    if ! command -v pk12util &> /dev/null; then
+      brew install nss
+    fi
+    if ! command -v jq &> /dev/null; then
+      brew install jq
+    fi
+    ;;
+  *)
+    echo "Unsupported OS: $OSTYPE"
+    exit 1
+    ;;
+esac
+
+
+# detect architecture
+case $(uname -m) in
+  'arm64')
+    mkcertArch='arm64'
+    ;;
+  'x86_64')
+    mkcertArch='amd64'
+    ;;
+  *)
+    echo "Unsupported CPU architecture $(uname -m)"
+    exit 1
+esac
+
+# check and download mkcert
+if [ ! -f "$mkcertPath" ]; then
+  echo "Downloading mkcert for $mkcertOS/$mkcertArch"
+  downloadUrl=$(curl -s 'https://api.github.com/repos/FiloSottile/mkcert/releases' | jq -r "[.[0].assets[]] | map(select(.name | endswith(\"$mkcertOS-$mkcertArch\")))[0].browser_download_url")
+  curl -L "$downloadUrl" -o "$mkcertPath"
+  chmod +x "$mkcertPath"
+else
+  echo "Detected mkcert - skip download"
+fi
+
+# run mkcert to generate root CA
+$mkcertPath -install
+
+if [ $showWslHint = 1 ]; then
+  # copy rootCA.pem to .crt extension
+  cd $projectDir/data/certs/ && cp -f rootCA.pem rootCA.crt
+  echo "It seems you are using WSL - please open \"$(wslpath -w "$projectDir/data/certs")\" and import the rootCA.crt file"
+fi

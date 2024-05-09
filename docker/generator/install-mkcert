@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# detect architecture
+case $(uname -m) in
+  'arm64')
+    mkcertArch='arm64'
+    ;;
+  'x86_64')
+    mkcertArch='amd64'
+    ;;
+  *)
+    echo "Unsupported CPU architecture $(uname -m)"
+    exit 1
+esac
+
+mkcertPath=/usr/local/bin/mkcert
+downloadUrl=$(curl -s 'https://api.github.com/repos/FiloSottile/mkcert/releases' | jq -r "[.[0].assets[]] | map(select(.name | endswith(\"linux-$mkcertArch\")))[0].browser_download_url")
+curl -L "$downloadUrl" -o "$mkcertPath"
+chmod +x $mkcertPath

@@ -1,0 +1,34 @@
+services:
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./data/html:/usr/share/nginx/html
+      - ./data/certs:/etc/nginx/certs
+      - ./data/proxy/:/etc/nginx/conf.d
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dockergen:
+    build:
+      context: ./docker/generator
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    volumes_from:
+      - nginx
+    tty: true
+    command: -config /etc/docker-gen/config
+    environment:
+      - CAROOT=/etc/nginx/certs
+
+  whoami:
+    image: jwilder/whoami
+    environment:
+      - VIRTUAL_HOST=whoami.localhost
