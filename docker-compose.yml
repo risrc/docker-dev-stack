@@ -1,7 +1,8 @@
+name: dev-proxy
+
 services:
   nginx:
     image: nginx:stable
-    container_name: nginx
     restart: unless-stopped
     ports:
       - 80:80

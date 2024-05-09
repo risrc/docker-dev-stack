@@ -72,7 +72,7 @@ server {
 	gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
 
     listen 443 ssl;
-    http2  on;
+    http2 on;
 
 	server_name {{ $host }};
 	proxy_buffering off;

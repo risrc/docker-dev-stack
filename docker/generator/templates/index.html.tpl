@@ -3,6 +3,7 @@
     <head>
         <title>Dev Proxy - Project Overview</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="main.css">
     </head>
     <body>
         <header>
@@ -21,7 +22,7 @@
         {{ end }}
         </nav>
         <footer>
-            Powered by <a href="https://gitlab.com">RiSrc-Dev-Proxy</a>
+            Powered by <a href="https://gitlab.com/risrc/dev-proxy">RiSrc DevProxy</a>
         </footer>
     </body>
 </html>

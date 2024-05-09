@@ -1,3 +1,9 @@
 .idea
-/data
+
 bin/mkcert
+
+!/data/
+/data/*
+!/data/html/
+/data/html/*
+!/data/html/main.css
