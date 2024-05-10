@@ -10,11 +10,15 @@
             <h1>Dev Proxy - Project Overview</h1>
         </header>
         <nav>
-        {{ range $project, $containers := groupByLabel $ "com.docker.compose.project" }}
+        {{ range $project, $projectContainers := groupByLabel $ "com.docker.compose.project" }}
+            {{ $groupedContainers := groupByMulti $projectContainers "Env.VIRTUAL_HOST" "," }}
+            {{ if eq (len $groupedContainers) 0 }}
+                {{ continue }}
+            {{ end }}
             <article>
                 <h3>{{ $project }}</h3>
                 <ul>
-                {{ range $host, $projectContainers := groupByMulti $containers "Env.VIRTUAL_HOST" "," }}
+                {{ range $host, $vHostContainers := $groupedContainers }}
                     <li><a href="https://{{ $host }}">{{ $host }}</a></li>
                 {{ end }}
                 </ul>
