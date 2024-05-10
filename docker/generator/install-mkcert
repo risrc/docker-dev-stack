@@ -2,7 +2,7 @@
 
 # detect architecture
 case $(uname -m) in
-  'arm64')
+  'arm64'|'aarch64')
     mkcertArch='arm64'
     ;;
   'x86_64')
