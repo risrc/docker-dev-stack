@@ -1,8 +1,7 @@
-{{/* default nginx configuration template */}}
-{{/* Generate a configuration file based on the containers mandatory */}}
-{{/* VIRTUAL_HOST environment variable and the exposed ports. If multiple */}}
-{{/* ports are exposed, the first one is used, unless set with VIRTUAL_PORT */}}
-
+{{/* default nginx configuration template
+   * Generate a configuration file based on the containers mandatory VIRTUAL_HOST environment variable
+   * and the exposed ports. If multiple ports are exposed, the first one is used, unless set with VIRTUAL_PORT
+   */}}
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -95,7 +94,6 @@ server {
 
 		# HTTP 1.1 support
 		proxy_http_version 1.1;
-		#proxy_set_header Connection "";
 	}
 }
 {{ end }}

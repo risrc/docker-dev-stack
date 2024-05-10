@@ -3,6 +3,7 @@ name: dev-proxy
 services:
   nginx:
     image: nginx:stable
+    container_name: dev_proxy
     restart: unless-stopped
     ports:
       - 80:80
@@ -31,5 +32,7 @@ services:
 
   whoami:
     image: jwilder/whoami
+    profiles:
+      - develop
     environment:
       - VIRTUAL_HOST=whoami.localhost
