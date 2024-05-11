@@ -1,4 +1,7 @@
 name: dev-proxy
+networks:
+  default:
+    name: dev_proxy
 
 services:
   nginx:
