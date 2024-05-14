@@ -9,7 +9,6 @@ mkdir -p data/certs data/html data/proxy
 
 export CAROOT=$projectDir/data/certs
 
-echo "os: $OSTYPE"
 # detect os and check dependencies
 case "$OSTYPE" in
   'linux'*)
@@ -25,6 +24,7 @@ case "$OSTYPE" in
       dependencyCheckFailed=1
     fi
     if [ $dependencyCheckFailed = 1 ]; then exit 1; fi
+
     # check for wsl
     if uname -r | grep -q 'microsoft'; then
       showWslHint=1

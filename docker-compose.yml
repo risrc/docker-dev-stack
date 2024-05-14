@@ -1,9 +1,12 @@
 name: dev-proxy
+
+# define named network for use in other projects
 networks:
   default:
     name: dev_proxy
 
 services:
+  # proxy serving index page and routing requests to upstream services
   nginx:
     image: nginx:stable
     container_name: dev_proxy
@@ -20,6 +23,7 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # generator service - watches container events, compiles templates and notifies dependencies
   dockergen:
     build:
       context: ./docker/generator
@@ -33,6 +37,7 @@ services:
     environment:
       - CAROOT=/etc/nginx/certs
 
+  # example vhost service used during proxy development
   whoami:
     image: jwilder/whoami
     profiles:

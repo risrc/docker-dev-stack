@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "$1";
-
 cd "$CAROOT" || exit
 mkcert localhost;
 cat "$1" | xargs mkcert
