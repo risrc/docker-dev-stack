@@ -33,7 +33,7 @@ case "$OSTYPE" in
   'darwin'*)
     echo 'detected MacOS - checking dependencies'
     mkcertOS='darwin'
-    if ! command -v pk12util &> /dev/null; then
+    if ! command -v certutil &> /dev/null; then
       brew install nss
     fi
     if ! command -v jq &> /dev/null; then
