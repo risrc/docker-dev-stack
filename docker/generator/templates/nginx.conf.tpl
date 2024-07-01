@@ -33,6 +33,19 @@ upstream {{ $host }} {
 	{{ $addrLen := len $value.Addresses }}
 	{{ $network := index $value.Networks 0 }}
 
+	{{ range sortObjectsByKeysAsc $value.Networks "Name" }}
+	    {{ if eq "default" ( split .Name "_" | last ) }}
+	        {{/* skip default networks */}}
+	        {{ continue }}
+	    {{ end }}
+	    {{ if eq "dev_proxy" .Name }}
+	        {{/* use 'dev_proxy' network */}}
+	        {{ $network = . }}
+	        {{ break }}
+	    {{ end }}
+	    {{ $network = . }}
+	{{ end }}
+
 	{{ if $value.State.Health.Status }}
 		{{ if ne $value.State.Health.Status "healthy" }}
 			{{ continue }}
