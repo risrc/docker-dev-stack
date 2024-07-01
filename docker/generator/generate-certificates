@@ -2,4 +2,4 @@
 
 cd "$CAROOT" || exit
 mkcert localhost;
-cat "$1" | xargs mkcert
+cat "$1" | xargs -I {} mkcert -cert-file {}.pem -key-file {}-key.pem {}
