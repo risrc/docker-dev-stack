@@ -3,25 +3,26 @@ Dev Proxy
 
 This project provides an easy to set up ssl proxy for local docker-compose based web development.
 
-It utilises [docker-gen]() and [mkcert]() to watch container events and automatically generate self-signed SSL
-certificates for new launched containers. The nginx proxy configuration is updated as well and an index page
-listing all currently available vhosts is provided.
+It utilises [docker-gen](https://github.com/nginx-proxy/docker-gen) and [mkcert](https://github.com/FiloSottile/mkcert)
+to watch container events and generate self-signed SSL certificates for new launched containers.
+
+The nginx proxy configuration is updated automatically and an index page listing all currently available vhosts is provided on `https://localhost`.
 
 Supported OS
 ------------
 - Linux
 - MacOS
-- Windows (tested with Docker Desktop and WSL2 running Ubuntu)
+- Windows (tested with WSL2 running Ubuntu and Docker Desktop)
 
 Requirements
 ------------
-- [docker]()
-- [docker-compose]()
+- [Docker CE](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/)
 - bash shell (to run the init script)
-- certutil (for [mkcert]() certificate generation)
-- [jq]() during setup
+- certutil (necessary for mkcert)
+- [jq](https://jqlang.github.io/jq/) (used in init script)
 
-The init script tries to resolve missing `certutil` and `jq` dependencies or provides links to setup instructions
+The init script tries to resolve missing `certutil` and `jq` dependencies or provides links for setup instructions
 
 Usage
 -----
@@ -40,7 +41,7 @@ networks:
     external: true
 ```
 
-Configure your service to join the network and add `VIRTUAL_HOST` environment variable
+Configure your service to access the proxy network and add the `VIRTUAL_HOST` environment variable
 to provide the desired local domain name.
 
 ```
@@ -50,14 +51,16 @@ services:
     ..
     networks:
       - proxy
-      - default # to also access the default network for communication with other containers in this project.
+      - default # to access other project containers (e.g. database)
     environment:
       VIRTUAL_HOST: my-domain.localhost
 ```
 
 
 If the service exposes only one port, this will be used by the generated nginx upstream,
-otherwise it will fall back to port `80`. To configure a port the `VIRTUAL_PORT` environment variable can be used.
+otherwise it will fall back to port `80`.
+
+To configure a specific port, the `VIRTUAL_PORT` environment variable is available.
 ```
   environment:
     VIRTUAL_HOST: my-domain.localhost
@@ -66,25 +69,26 @@ otherwise it will fall back to port `80`. To configure a port the `VIRTUAL_PORT`
 
 How it works
 ------------
-The init script downloads the current version of mkcert available for the host machine.
-Mkcert generates a new rootCA and updates your local truststore. 
+Initializing a local root certificate and handling the local truststores
+- the init script downloads the current version of mkcert available for the host machine
+- mkcert generates a new rootCA and updates your local truststore
+  (Windows users, please see [troubleshooting](#mkcert-isnt-able-to-install-the-rootca-in-the-windows-truststore) instructions) 
 
-While the containers are running, docker-gen listens to container events using the read-only mounted `docker.sock`.
-
-Every time a container is started/stopped, the defined templates are recompiled. If the vhost entries have changed:
-- a notify command is executed to generate missing SSL certificates
-- the nginx configuration is updated by sending a SIGHUP signal to the nginx container 
-- an index page is generated, listing all available projects with their vhosts
+Generating new SSL certificates for docker containers on the fly
+- **docker-gen** listens to container events using the read-only mounted `docker.sock`
+- when a container is started/stopped and vhost entries are added/removed:
+  - missing SSL certificates are generated
+  - the nginx configuration is updated
+  - the index page is updated with all available projects and their defined vhosts
 
 Troubleshooting
 ---------------
-### mkcert cannot install the rootCA in the Windows truststore
-The certificate has to be installed manually.
-If WSL2 is detected from the init script, it will display a hint pointing to the rootCA location.
+### mkcert isn't able to install the rootCA in the Windows truststore
+The certificate can be installed manually
+- if WSL2 is detected from the init script, it will display a hint pointing to the rootCA location
+- open (double-click) the mentioned rootCA.crt file and follow the instructions from the dialog
+  (the correct target truststore should be selected manually)
 
-Open (double-click) the mentioned rootCA.crt file and follow the instructions from the dialog.
+Solution is based on these comments from the mkcert issue tracker:  [\[1\]](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1466762021), [\[2\]](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1471909333)
 
-See also [this comment](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1466762021)
-from the mkcert issue tracker. 
 
-Hint: the target truststore should be selected manually
