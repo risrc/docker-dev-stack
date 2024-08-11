@@ -13,6 +13,7 @@ watch = true
 template = "/etc/docker-gen/templates/nginx.conf.tpl"
 dest = "/etc/nginx/conf.d/default.conf"
 watch = true
+wait = "5s:10s"
 
 [config.NotifyContainers]
 dev_proxy = 1  # 1 is a signal number to be sent; here SIGHUP
