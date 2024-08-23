@@ -2,6 +2,10 @@
    * Generate a configuration file based on the containers mandatory VIRTUAL_HOST environment variable
    * and the exposed ports. If multiple ports are exposed, the first one is used, unless set with VIRTUAL_PORT
    */}}
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      '';
+}
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -27,7 +31,7 @@ server {
 
 {{ range $host, $containers := groupByMulti $ "Env.VIRTUAL_HOST" "," }}
 upstream {{ $host }} {
-
+    zone upstreams 64K;
 {{ range $index, $value := $containers }}
 
 	{{ $addrLen := len $value.Addresses }}
@@ -52,42 +56,32 @@ upstream {{ $host }} {
 		{{ end }}
 	{{ end }}
 
+    # {{$value.Name}}
 	{{/* If only 1 port exposed, use that */}}
 	{{ if eq $addrLen 1 }}
-		{{ with $address := index $value.Addresses 0 }}
-			# {{$value.Name}}
-			server {{ $network.IP }}:{{ $address.Port }};
-		{{ end }}
-
+    {{ with $address := index $value.Addresses 0 }}
+    server {{ $network.IP }}:{{ $address.Port }} max_fails=1 fail_timeout=2s;
+    {{ end }}
 	{{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var */}}
 	{{ else if $value.Env.VIRTUAL_PORT }}
-		{{ range $i, $address := $value.Addresses }}
-			{{ if eq $address.Port $value.Env.VIRTUAL_PORT }}
-			# {{$value.Name}}
-			server {{ $network.IP }}:{{ $address.Port }};
-			{{ end }}
-		{{ end }}
-
+	server {{ $network.IP }}:{{ $value.Env.VIRTUAL_PORT }} max_fails=1 fail_timeout=2s;
 	{{/* Else default to standard web port 80 */}}
 	{{ else }}
-		{{ range $i, $address := $value.Addresses }}
-			{{ if eq $address.Port "80" }}
-			# {{$value.Name}}
-			server {{ $network.IP }}:{{ $address.Port }};
-			{{ end }}
-		{{ end }}
+	server {{ $network.IP }}:80 max_fails=1 fail_timeout=2s;
 	{{ end }}
 {{ end }}
+    keepalive 2;
 }
 
 server {
 	gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
 
     listen 443 ssl;
-    http2 on;
+    {{ $container := index $containers 0 }}
+    {{ if not $container.Env.DISABLE_HTTP2 }}http2 on;{{ end }}
 
 	server_name {{ $host }};
-	proxy_buffering off;
+	# proxy_buffering off; # Disabled, for reason see https://www.f5.com/company/blog/nginx/avoiding-top-10-nginx-configuration-mistakes#proxy_buffering-off
 	error_log /proc/self/fd/2;
 	access_log /proc/self/fd/1;
 
@@ -102,11 +96,21 @@ server {
 		proxy_set_header X-Forwarded-Proto $scheme;
 		proxy_set_header X-Forwarded-Host $server_name;
         proxy_set_header X-Forwarded-Ssl on;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_next_upstream error timeout http_500;
 
-		# HTTP 1.1 support
+        # websocket support
 		proxy_http_version 1.1;
-	}
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        # extend timeouts
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_connect_timeout 60s;
+
+        # adjust buffer for performance
+        proxy_buffer_size 16k;
+        proxy_buffers 4 32k;
+    }
 }
 {{ end }}
