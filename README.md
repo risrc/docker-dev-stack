@@ -1,5 +1,5 @@
-Dev Proxy
-=========
+Docker Dev Stack
+================
 
 This project provides an easy to set up ssl proxy for local docker compose based web development.
 
@@ -7,6 +7,8 @@ It utilises [docker-gen](https://github.com/nginx-proxy/docker-gen) and [mkcert]
 to watch container events and generates self-signed SSL certificates for new launched containers.
 
 The nginx proxy configuration is updated automatically and an index page with all currently available vhosts is provided on `https://localhost`.
+
+Additionally, [MailDev](#maildev) is provided for local email testing.
 
 Supported OS
 ------------
@@ -50,8 +52,8 @@ services:
   my_vhost_service:
     ..
     networks:
-      - proxy
-      - default # to access other project containers (e.g. database)
+      - proxy # connect to proxy network
+      - default # preserve access to other project containers (i.e. database)
     environment:
       VIRTUAL_HOST: my-domain.localhost
 ```
@@ -102,10 +104,14 @@ The certificate can be installed manually
 
 Solution is based on these comments from the mkcert issue tracker:  [\[1\]](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1466762021), [\[2\]](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1471909333)
 
-Credits
--------
-- docker-gen
-- maildev
+### websocket connections cause error with http2
+If you encounter similar errors to "Illegal connection-specific header 'upgrade' encountered",
+you can disable http2 for the container by setting the `DISABLE_HTTP2` environment variable to `true`.
+
+```
+  environment:
+    DISABLE_HTTP2: true
+```
 
 LICENSE
 -------
