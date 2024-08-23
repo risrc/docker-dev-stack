@@ -43,5 +43,6 @@ services:
     image: maildev/maildev:latest
     restart: unless-stopped
     environment:
+      MAILDEV_IP: "::" # fixes issue with healthcheck (see https://github.com/maildev/maildev/issues/484#issuecomment-2167374618)
       VIRTUAL_HOST: maildev.localhost
       VIRTUAL_PORT: 1080
