@@ -92,7 +92,7 @@ with an easy-to-use web interface that runs on your machine.
 #### Usage
 Configure your application to send emails via `SMTP` on port `1025`.
 
-The MailDev user interface is available at [maildev.localhost](https://maildev.localhost)
+The MailDev user interface is available at `https://maildev.localhost`.
 
 Troubleshooting
 ---------------
@@ -100,7 +100,8 @@ Troubleshooting
 The certificate can be installed manually
 - if WSL2 is detected from the init script, it will display a hint pointing to the rootCA location
 - open (double-click) the mentioned rootCA.crt file and follow the instructions from the dialog
-  (the correct target truststore should be selected manually)
+  (the correct target truststore `Trusted Root Certification Authorities` should be selected manually)
+- a browser restart may be required afterward
 
 Solution is based on these comments from the mkcert issue tracker:  [\[1\]](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1466762021), [\[2\]](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1471909333)
 

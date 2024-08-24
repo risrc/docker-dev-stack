@@ -73,5 +73,6 @@ $mkcertPath -install
 if [ $showWslHint = 1 ]; then
   # copy rootCA.pem to .crt extension
   cd $projectDir/.generated/certs/ && cp -f rootCA.pem rootCA.crt
-  echo "It seems you are using WSL - please open \"$(wslpath -w "$projectDir/.generated/certs")\" and import the rootCA.crt file"
+  echo "It seems you are using WSL - please open \"$(wslpath -w "$projectDir/.generated/certs")\" and import the rootCA.crt file."
+  echo "For further information, have a look at the Troubleshooting section of the README file"
 fi
