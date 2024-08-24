@@ -1,9 +1,7 @@
+# IDE
 .idea
 
+# project files
 bin/mkcert
+.generated
 
-!/data/
-/data/*
-!/data/html/
-/data/html/*
-!/data/html/main.css

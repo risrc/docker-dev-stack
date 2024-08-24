@@ -5,9 +5,7 @@ projectDir="$(dirname "$workingDir")"
 mkcertPath=$workingDir/mkcert
 showWslHint=0
 
-mkdir -p data/certs data/html data/proxy
-
-export CAROOT=$projectDir/data/certs
+export CAROOT=$projectDir/.generated/certs
 
 # detect os and check dependencies
 case "$OSTYPE" in
@@ -20,7 +18,7 @@ case "$OSTYPE" in
       dependencyCheckFailed=1
     fi
     if ! command -v certutil &> /dev/null; then
-      echo "Missing dependency - Please install certutil provided by nss-tools (See https://github.com/FiloSottile/mkcert/blob/master/README.md#linux)"
+      echo "Missing dependency - Please install certutil (see https://github.com/FiloSottile/mkcert/blob/master/README.md#linux)"
       dependencyCheckFailed=1
     fi
     if [ $dependencyCheckFailed = 1 ]; then exit 1; fi
@@ -45,7 +43,6 @@ case "$OSTYPE" in
     exit 1
     ;;
 esac
-
 
 # detect architecture
 case $(uname -m) in
@@ -75,6 +72,6 @@ $mkcertPath -install
 
 if [ $showWslHint = 1 ]; then
   # copy rootCA.pem to .crt extension
-  cd $projectDir/data/certs/ && cp -f rootCA.pem rootCA.crt
-  echo "It seems you are using WSL - please open \"$(wslpath -w "$projectDir/data/certs")\" and import the rootCA.crt file"
+  cd $projectDir/.generated/certs/ && cp -f rootCA.pem rootCA.crt
+  echo "It seems you are using WSL - please open \"$(wslpath -w "$projectDir/.generated/certs")\" and import the rootCA.crt file"
 fi
