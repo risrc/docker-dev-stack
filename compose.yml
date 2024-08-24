@@ -35,12 +35,13 @@ services:
     tty: true
     command: -config /etc/docker-gen/config
     environment:
-      - CAROOT=/etc/nginx/certs
+      CAROOT: /etc/nginx/certs
 
-  # example vhost service used during proxy development
-  whoami:
-    image: jwilder/whoami
-    profiles:
-      - develop
+  # provides smtp server and web interface to test emails locally
+  maildev:
+    container_name: maildev
+    image: maildev/maildev:latest
+    restart: unless-stopped
     environment:
-      - VIRTUAL_HOST=whoami.localhost
+      VIRTUAL_HOST: maildev.localhost
+      VIRTUAL_PORT: 1080
