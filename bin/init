@@ -26,6 +26,10 @@ case "$OSTYPE" in
     # check for wsl
     if uname -r | grep -q 'microsoft'; then
       showWslHint=1
+    else
+      # handle permissions for linux
+      printf "USER_ID=$(id -u)\nGROUP_ID=$(id -g)\nDOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)" > $projectDir/.env
+      cp $projectDir/compose.override.linux.yml $projectDir/compose.override.yml
     fi
     ;;
   'darwin'*)

@@ -1,0 +1,5 @@
+services:
+  docker-gen:
+    user: ${USER_ID:-1000}:${GROUP_ID:-1000}
+    group_add:
+      - ${DOCKER_GROUP_ID:-999}
