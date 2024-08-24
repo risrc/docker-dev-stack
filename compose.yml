@@ -17,7 +17,7 @@ services:
     volumes:
       - ./.generated/html:/usr/share/nginx/html
       - ./.generated/certs:/etc/nginx/certs
-      - ./.generated/proxy/:/etc/nginx/conf.d
+      - ./.generated/config/:/etc/nginx/conf.d
     logging:
       options:
         max-size: "10m"
