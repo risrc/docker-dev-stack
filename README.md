@@ -1,12 +1,12 @@
 Dev Proxy
 =========
 
-This project provides an easy to set up ssl proxy for local docker-compose based web development.
+This project provides an easy to set up ssl proxy for local docker compose based web development.
 
 It utilises [docker-gen](https://github.com/nginx-proxy/docker-gen) and [mkcert](https://github.com/FiloSottile/mkcert)
-to watch container events and generate self-signed SSL certificates for new launched containers.
+to watch container events and generates self-signed SSL certificates for new launched containers.
 
-The nginx proxy configuration is updated automatically and an index page listing all currently available vhosts is provided on `https://localhost`.
+The nginx proxy configuration is updated automatically and an index page with all currently available vhosts is provided on `https://localhost`.
 
 Supported OS
 ------------
@@ -32,7 +32,7 @@ Usage
 2. run `bin/init` from the project root and resolve missing dependencies if necessary
 3. start the containers by running `docker compose up -d`
 
-### Use the proxy in other compose projects
+### Using the proxy in other compose projects
 Add the proxy as external network in your compose file.
 ```
 networks:
@@ -69,17 +69,28 @@ To configure a specific port, the `VIRTUAL_PORT` environment variable is availab
 
 How it works
 ------------
-Initializing a local root certificate and handling the local truststores
+### Initializing a local root certificate and handling the local truststores
 - the init script downloads the current version of mkcert available for the host machine
 - mkcert generates a new rootCA and updates your local truststore
   (Windows users, please see [troubleshooting](#mkcert-isnt-able-to-install-the-rootca-in-the-windows-truststore) instructions) 
 
-Generating new SSL certificates for docker containers on the fly
+### Generating new SSL certificates for docker containers on the fly
 - **docker-gen** listens to container events using the read-only mounted `docker.sock`
 - when a container is started/stopped and vhost entries are added/removed:
   - missing SSL certificates are generated
   - the nginx configuration is updated
   - the index page is updated with all available projects and their defined vhosts
+
+Additional Utilities
+--------------------
+### maildev
+[MailDev](https://github.com/maildev/maildev) is a simple way to test your project's generated emails during development,
+with an easy-to-use web interface that runs on your machine.
+
+#### Usage
+Configure your application to send emails via `SMTP` on port `1025`.
+
+The MailDev user interface is available at [maildev.localhost](https://maildev.localhost)
 
 Troubleshooting
 ---------------
@@ -91,4 +102,11 @@ The certificate can be installed manually
 
 Solution is based on these comments from the mkcert issue tracker:  [\[1\]](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1466762021), [\[2\]](https://github.com/FiloSottile/mkcert/issues/357#issuecomment-1471909333)
 
+Credits
+-------
+- docker-gen
+- maildev
 
+LICENSE
+-------
+[MIT](LICENSE)
