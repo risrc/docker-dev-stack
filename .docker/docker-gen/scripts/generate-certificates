@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 cd "$CAROOT" || exit
 mkcert localhost;
-cat "$1" | xargs -I {} mkcert -cert-file {}.pem -key-file {}-key.pem {}
+xargs -a "$1" -I {} mkcert -cert-file {}.pem -key-file {}-key.pem {}

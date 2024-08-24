@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 workingDir="$(readlink -f "$(dirname "$0")")"
 projectDir="$(dirname "$workingDir")"
