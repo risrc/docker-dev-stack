@@ -56,6 +56,11 @@ upstream {{ $host }} {
 		{{ end }}
 	{{ end }}
 
+	{{/* container has no IP on the chosen network (e.g. still starting) */}}
+	{{ if not $network.IP }}
+		{{ continue }}
+	{{ end }}
+
     # {{$value.Name}}
 	{{/* If only 1 port exposed, use that */}}
 	{{ if eq $addrLen 1 }}
@@ -70,6 +75,8 @@ upstream {{ $host }} {
 	server {{ $network.IP }}:80 max_fails=1 fail_timeout=2s;
 	{{ end }}
 {{ end }}
+    # ponytail: placeholder so nginx accepts the upstream while no container is ready yet (502 until regenerated)
+    server 127.0.0.1:1 down;
     keepalive 2;
 }
 
