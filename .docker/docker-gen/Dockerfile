@@ -10,6 +10,6 @@ WORKDIR /etc/docker-gen
 COPY templates templates
 COPY config config
 
-COPY scripts/generate-certificates /usr/local/bin/generate-certificates
+COPY scripts/generate-certificates scripts/reload-nginx /usr/local/bin/
 
 

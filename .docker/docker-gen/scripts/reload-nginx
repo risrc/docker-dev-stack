@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+# Reload nginx via `docker exec` instead of a kill signal: the kill API marks the
+# container as manually stopped, so `restart: unless-stopped` would skip it on the next boot.
+
+api() { curl -sf --unix-socket /tmp/docker.sock -H 'Content-Type: application/json' -d "$2" "http://localhost$1"; }
+
+id=$(api /containers/dev_proxy/exec '{"Cmd":["nginx","-s","reload"]}' | jq -r .Id) || exit 1
+api "/exec/$id/start" '{"Detach":true}' >/dev/null
